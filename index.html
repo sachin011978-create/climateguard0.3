@@ -2066,6 +2066,8 @@
       const vEl = document.getElementById('bg-video');
       if (vEl && !vEl.src.includes(vid)) {
         vEl.src = vid;
+        vEl.load();
+        vEl.play().catch(e => console.log('Autoplay prevented:', e));
       }
     }
   </script>
