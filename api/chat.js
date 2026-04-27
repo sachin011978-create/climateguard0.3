@@ -25,7 +25,11 @@ export default async function handler(req, res) {
         
         const GEMINI_KEY = process.env.GOOGLE_API_KEY;
         const GROQ_KEY = process.env.GROQ_API_KEY;
-        const systemInstruction = "तू 'ClimateGuard AI' आहेस. युजर ज्या भाषेत प्रश्न विचारेल, त्याच भाषेत उत्तर दे. उत्तर ३-४ ओळींत मर्यादित ठेव.";
+        
+        const lang = body.lang || 'en';
+        const baseSystem = body.system || "You are 'ClimateGuard AI'. Be concise and helpful.";
+        const systemInstruction = `${baseSystem} STRICT INSTRUCTION: You must respond in the language specified by the system context. Ensure you use natural, grammatically correct language. Avoid awkward, literal, or machine-like translations. Your tone should be empathetic, professional, and practical. Keep responses under 3-4 lines unless a detailed plan is requested.`;
+
         // २. 'Smart Keyword' शोध (API वाचवण्यासाठी)
         for (let key in PREDEFINED_KNOWLEDGE) {
             if (userQuery.includes(key)) {
@@ -95,4 +99,3 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: "सर्व सेवा सध्या व्यस्त आहेत. कृपया थोड्या वेळाने प्रयत्न करा." });
     }
 }
-
