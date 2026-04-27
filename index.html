@@ -5,31 +5,30 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ClimateGuard AI</title>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap"
-    rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Marathi:ital@0;1&display=swap');
     :root {
-      --bg: #0a0f0a;
-      --surface: #111a11;
-      --card: #162016;
-      --border: rgba(74, 200, 100, 0.12);
-      --border-b: rgba(74, 200, 100, 0.3);
+      --bg: transparent;
+      --surface: rgba(255, 255, 255, 0.05);
+      --card: rgba(255, 255, 255, 0.1);
+      --border: rgba(255, 255, 255, 0.2);
+      --border-b: rgba(255, 255, 255, 0.3);
       --g: #4ac864;
-      --gg: rgba(74, 200, 100, 0.15);
+      --gg: rgba(74, 200, 100, 0.25);
       --gd: #1e6028;
       --amb: #f5a623;
-      --amb-bg: rgba(245, 166, 35, 0.12);
+      --amb-bg: rgba(245, 166, 35, 0.15);
       --red: #f05454;
-      --red-bg: rgba(240, 84, 84, 0.1);
+      --red-bg: rgba(240, 84, 84, 0.15);
       --blue: #4a9cf5;
-      --blue-bg: rgba(74, 156, 245, 0.1);
-      --txt: #e8f0e8;
-      --tm: #7a9a7a;
-      --td: #4a6a4a;
-      --fd: 'Syne', sans-serif;
-      --fb: 'DM Sans', sans-serif;
+      --blue-bg: rgba(74, 156, 245, 0.15);
+      --txt: #ffffff;
+      --tm: #e0e0e0;
+      --td: #b0b0b0;
+      --fd: 'Poppins', sans-serif;
+      --fb: 'Poppins', 'Noto Sans Devanagari', sans-serif;
       --r: 12px;
       --rs: 8px;
     }
@@ -38,6 +37,12 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0
+    }
+
+    /* Glassmorphism blur utility */
+    .lang-select, .weather-strip, .city-input, .city-btn, .earth-card, .nav-card, .chat-box, .chip, .msg.a .mb, .typing, .input-row textarea, .si, .aabtn, .tc, .ac {
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
     }
 
     body {
@@ -1164,6 +1169,9 @@
 </head>
 
 <body>
+  <video id="bg-video" autoplay loop muted playsinline style="position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;">
+    <source src="https://cdn.pixabay.com/vimeo/147112028/clouds-1154.mp4?width=1280" type="video/mp4">
+  </video>
   <div class="wrap">
 
     <!-- HEADER -->
@@ -1984,7 +1992,7 @@
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ system: sys, messages: history })
+          body: JSON.stringify({ system: sys, messages: history, lang: curLang })
         });
 
         if (!res.ok) {
@@ -2019,21 +2027,12 @@
 
         rmTyping();
 
-        // २. चॅट बॉक्समध्ये उत्तर दाखवणे आणि सोबत '🔊 ऐका' बटण जोडणे
+        // २. चॅट बॉक्समध्ये उत्तर दाखवणे
         const formattedReply = reply.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>');
         
-        const safeTextToSpeak = reply.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, " ");
-        const speakBtnHtml = `
-          <div style="margin-top: 8px;">
-            <button onclick="speakText('${safeTextToSpeak}')" 
-                    style="color: #2563eb; font-size: 12px; font-weight: bold; background: none; border: none; padding: 0; cursor: pointer;">
-              🔊 उत्तर ऐका (Speak)
-            </button>
-          </div>
-        `;
-
-        addMsg('a', formattedReply + speakBtnHtml);
+        addMsg('a', formattedReply);
         history.push({ role: 'assistant', content: reply });
+        changeVideoBasedOnKeyword(reply);
       } catch (err) {
         rmTyping();
         addMsg('a', '⚠️ Network error: ' + err.message + '. Please check your internet connection and try again.');
@@ -2047,15 +2046,21 @@
     geoWeather();
     setTimeout(() => { if (!curWeather) fetchWeather('Mumbai'); }, 8000);
 
-    function speakText(text) {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel(); // आधीचा आवाज थांबवण्यासाठी
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'mr-IN'; // मराठी आवाज
-        utterance.rate = 0.85; // स्पष्ट ऐकू येण्यासाठी थोडा सावकाश वेग
-        window.speechSynthesis.speak(utterance);
-      } else {
-        alert("तुमच्या ब्राउझरमध्ये आवाज सुविधा उपलब्ध नाही.");
+    function changeVideoBasedOnKeyword(text) {
+      const t = text.toLowerCase();
+      let vid = 'https://cdn.pixabay.com/vimeo/147112028/clouds-1154.mp4?width=1280'; // Default
+      
+      if (t.includes('उन्हाळा') || t.includes('heat') || t.includes('sun') || t.includes('उष्माघात')) {
+        vid = 'https://cdn.pixabay.com/vimeo/329434839/sun-23263.mp4?width=1280';
+      } else if (t.includes('पाऊस') || t.includes('rain') || t.includes('monsoon')) {
+        vid = 'https://cdn.pixabay.com/vimeo/207037740/rain-8135.mp4?width=1280';
+      } else if (t.includes('वादळ') || t.includes('पूर') || t.includes('storm') || t.includes('flood') || t.includes('cyclone') || t.includes('hurricane')) {
+        vid = 'https://cdn.pixabay.com/vimeo/146054452/storm-1102.mp4?width=1280';
+      }
+      
+      const vEl = document.getElementById('bg-video');
+      if (vEl && !vEl.src.includes(vid)) {
+        vEl.src = vid;
       }
     }
   </script>
