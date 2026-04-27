@@ -1990,7 +1990,7 @@
         if (!res.ok) {
           const errText = await res.text();
           rmTyping();
-          let errMsg = 'Error connecting to AI. Please check your Netlify environment variable ANTHROPIC_API_KEY is set correctly.';
+          let errMsg = '⚠️ माफ करा, सर्व्हरशी संपर्क होऊ शकला नाही. कृपया थोड्या वेळाने पुन्हा प्रयत्न करा.';
           try { const e = JSON.parse(errText); if (e.error) errMsg = '⚠️ ' + e.error; } catch (e) { }
           addMsg('a', errMsg);
           history.pop();
