@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: transparent;
+      --bg: #0a0a0a;
       --surface: rgba(255, 255, 255, 0.05);
       --card: rgba(255, 255, 255, 0.1);
       --border: rgba(255, 255, 255, 0.2);
@@ -40,7 +40,7 @@
     }
 
     /* Glassmorphism blur utility */
-    .lang-select, .weather-strip, .city-input, .city-btn, .earth-card, .nav-card, .chat-box, .chip, .msg.a .mb, .typing, .input-row textarea, .si, .aabtn, .tc, .ac {
+    .weather-strip, .earth-card, .nav-card, .chat-box {
       backdrop-filter: blur(15px);
       -webkit-backdrop-filter: blur(15px);
     }
@@ -173,6 +173,11 @@
       font-size: 12px;
       cursor: pointer;
       outline: none
+    }
+
+    .lang-select option {
+      background: #0a0a0a;
+      color: var(--txt);
     }
 
     .lang-select:focus {
@@ -1169,7 +1174,7 @@
 </head>
 
 <body>
-  <video id="bg-video" autoplay loop muted playsinline style="position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;">
+  <video id="bg-video" autoplay loop muted playsinline style="position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; background-color: #0a0a0a;">
     <source src="https://cdn.pixabay.com/vimeo/147112028/clouds-1154.mp4?width=1280" type="video/mp4">
   </video>
   <div class="wrap">
