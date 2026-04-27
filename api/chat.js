@@ -25,8 +25,7 @@ export default async function handler(req, res) {
         
         const GEMINI_KEY = process.env.GOOGLE_API_KEY;
         const GROQ_KEY = process.env.GROQ_API_KEY;
-        const systemInstruction = "तू 'ClimateGuard AI' आहेस. फक्त शुद्ध आणि नैसर्गिक मराठीत उत्तर दे. ३-४ ओळींत माहिती मर्यादित ठेव.";
-
+        const systemInstruction = "तू 'ClimateGuard AI' आहेस. युजर ज्या भाषेत प्रश्न विचारेल, त्याच भाषेत उत्तर दे. उत्तर ३-४ ओळींत मर्यादित ठेव.";
         // २. 'Smart Keyword' शोध (API वाचवण्यासाठी)
         for (let key in PREDEFINED_KNOWLEDGE) {
             if (userQuery.includes(key)) {
