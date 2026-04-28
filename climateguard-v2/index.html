@@ -1,0 +1,2326 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClimateGuard AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: rgba(255, 255, 255, 0.05);
+      --card: rgba(255, 255, 255, 0.1);
+      --border: rgba(255, 255, 255, 0.2);
+      --border-b: rgba(255, 255, 255, 0.3);
+      --g: #4ac864;
+      --gg: rgba(74, 200, 100, 0.25);
+      --gd: #1e6028;
+      --amb: #f5a623;
+      --amb-bg: rgba(245, 166, 35, 0.15);
+      --red: #f05454;
+      --red-bg: rgba(240, 84, 84, 0.15);
+      --blue: #4a9cf5;
+      --blue-bg: rgba(74, 156, 245, 0.15);
+      --txt: #ffffff;
+      --tm: #e0e0e0;
+      --td: #b0b0b0;
+      --fd: 'Poppins', sans-serif;
+      --fb: 'Poppins', 'Noto Sans Devanagari', sans-serif;
+      --r: 12px;
+      --rs: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    /* Glassmorphism blur utility */
+    .weather-strip, .earth-card, .nav-card, .chat-box {
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--txt);
+      font-family: var(--fb);
+      min-height: 100vh;
+      overflow-x: hidden
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: linear-gradient(rgba(74, 200, 100, 0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(74, 200, 100, 0.025) 1px, transparent 1px);
+      background-size: 44px 44px;
+      pointer-events: none;
+      z-index: 0
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 0 16px 60px
+    }
+
+    /* HEADER */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 0 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px
+    }
+
+    .logo-g {
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
+
+    .logo-ico {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #1a5224, #4ac864);
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 18px rgba(74, 200, 100, 0.28);
+      flex-shrink: 0
+    }
+
+    .logo-ico svg {
+      width: 22px;
+      height: 22px;
+      fill: white
+    }
+
+    .logo-txt h1 {
+      font-family: var(--fd);
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--txt);
+      letter-spacing: -.5px
+    }
+
+    .logo-txt span {
+      font-size: 11px;
+      color: var(--tm);
+      font-weight: 300;
+      letter-spacing: .4px
+    }
+
+    .hdr-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap
+    }
+
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 12px;
+      background: var(--gg);
+      border: 1px solid var(--border-b);
+      border-radius: 20px;
+      font-size: 11px;
+      color: var(--g);
+      font-weight: 500
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--g);
+      border-radius: 50%;
+      animation: blink 2s infinite
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .3
+      }
+    }
+
+    /* LANG SELECTOR */
+    .lang-select {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--rs);
+      padding: 5px 10px;
+      color: var(--txt);
+      font-family: var(--fb);
+      font-size: 12px;
+      cursor: pointer;
+      outline: none
+    }
+
+    .lang-select option {
+      background: #0a0a0a;
+      color: var(--txt);
+    }
+
+    .lang-select:focus {
+      border-color: var(--g)
+    }
+
+    /* WEATHER STRIP */
+    .weather-strip {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px
+    }
+
+    .weather-left {
+      display: flex;
+      align-items: center;
+      gap: 14px
+    }
+
+    .weather-icon {
+      font-size: 38px;
+      line-height: 1
+    }
+
+    .weather-main h2 {
+      font-family: var(--fd);
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--txt);
+      line-height: 1
+    }
+
+    .weather-main p {
+      font-size: 13px;
+      color: var(--tm);
+      margin-top: 2px
+    }
+
+    .weather-stats {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap
+    }
+
+    .wstat {
+      text-align: center
+    }
+
+    .wstat .wval {
+      font-family: var(--fd);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--txt)
+    }
+
+    .wstat .wlbl {
+      font-size: 11px;
+      color: var(--td);
+      letter-spacing: .3px;
+      text-transform: uppercase;
+      margin-top: 2px
+    }
+
+    .weather-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px
+    }
+
+    .city-row {
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .city-input {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--rs);
+      padding: 6px 10px;
+      color: var(--txt);
+      font-family: var(--fb);
+      font-size: 12px;
+      outline: none;
+      width: 140px
+    }
+
+    .city-input:focus {
+      border-color: var(--g)
+    }
+
+    .city-btn {
+      padding: 6px 12px;
+      background: var(--gg);
+      border: 1px solid var(--border-b);
+      border-radius: var(--rs);
+      color: var(--g);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--fd)
+    }
+
+    .city-btn:hover {
+      background: rgba(74, 200, 100, .25)
+    }
+
+    .weather-loading {
+      font-size: 13px;
+      color: var(--tm);
+      padding: 8px 0
+    }
+
+    /* EARTH TEMP BANNER */
+    .earth-banner {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      margin-bottom: 20px
+    }
+
+    .earth-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 14px 16px;
+      position: relative;
+      overflow: hidden
+    }
+
+    .earth-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px
+    }
+
+    .earth-card.red::before {
+      background: var(--red)
+    }
+
+    .earth-card.amb::before {
+      background: var(--amb)
+    }
+
+    .earth-card.blue::before {
+      background: var(--blue)
+    }
+
+    .earth-card.g::before {
+      background: var(--g)
+    }
+
+    .earth-card .ec-val {
+      font-family: var(--fd);
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 3px
+    }
+
+    .earth-card.red .ec-val {
+      color: var(--red)
+    }
+
+    .earth-card.amb .ec-val {
+      color: var(--amb)
+    }
+
+    .earth-card.blue .ec-val {
+      color: var(--blue)
+    }
+
+    .earth-card.g .ec-val {
+      color: var(--g)
+    }
+
+    .earth-card .ec-lbl {
+      font-size: 12px;
+      color: var(--tm);
+      font-weight: 400
+    }
+
+    .earth-card .ec-sub {
+      font-size: 11px;
+      color: var(--td);
+      margin-top: 4px
+    }
+
+    /* NAV */
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 8px;
+      margin-bottom: 14px
+    }
+
+    .nav-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 14px 8px;
+      cursor: pointer;
+      transition: all .2s;
+      text-align: center;
+      position: relative;
+      overflow: hidden
+    }
+
+    .nav-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: transparent;
+      transition: background .2s
+    }
+
+    .nav-card:hover,
+    .nav-card.active {
+      background: var(--surface);
+      border-color: var(--border-b);
+      transform: translateY(-2px)
+    }
+
+    .nav-card.active::after {
+      background: var(--g)
+    }
+
+    .nav-card .ni {
+      font-size: 22px;
+      margin-bottom: 6px;
+      display: block
+    }
+
+    .nav-card .nl {
+      font-family: var(--fd);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--tm);
+      letter-spacing: .2px
+    }
+
+    .nav-card.active .nl {
+      color: var(--g)
+    }
+
+    /* PANELS */
+    .panel {
+      display: none;
+      animation: fi .22s ease
+    }
+
+    .panel.active {
+      display: block
+    }
+
+    @keyframes fi {
+      from {
+        opacity: 0;
+        transform: translateY(5px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    /* CHAT */
+    .chat-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column
+    }
+
+    .chat-hdr {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .chat-hdr-ico {
+      width: 32px;
+      height: 32px;
+      background: var(--gg);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px
+    }
+
+    .chat-hdr-info h3 {
+      font-family: var(--fd);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--txt)
+    }
+
+    .chat-hdr-info p {
+      font-size: 11px;
+      color: var(--tm)
+    }
+
+    .chips-row {
+      display: flex;
+      gap: 7px;
+      padding: 10px 18px;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      scrollbar-width: none
+    }
+
+    .chips-row::-webkit-scrollbar {
+      display: none
+    }
+
+    .chip {
+      padding: 6px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--tm);
+      cursor: pointer;
+      white-space: nowrap;
+      font-family: var(--fb);
+      transition: all .14s;
+      flex-shrink: 0
+    }
+
+    .chip:hover {
+      border-color: var(--g);
+      color: var(--g);
+      background: var(--gg)
+    }
+
+    .messages {
+      height: 400px;
+      overflow-y: auto;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent
+    }
+
+    .msg {
+      display: flex;
+      flex-direction: column;
+      max-width: 84%
+    }
+
+    .msg.u {
+      align-self: flex-end;
+      align-items: flex-end
+    }
+
+    .msg.a {
+      align-self: flex-start
+    }
+
+    .msg .ml {
+      font-size: 10px;
+      color: var(--td);
+      margin-bottom: 4px;
+      font-weight: 500;
+      letter-spacing: .3px
+    }
+
+    .msg .mb {
+      padding: 11px 15px;
+      border-radius: var(--r);
+      font-size: 14px;
+      line-height: 1.65
+    }
+
+    .msg.u .mb {
+      background: linear-gradient(135deg, #1e6028, #2a8040);
+      color: #d0f0d8;
+      border-radius: var(--r) var(--r) 4px var(--r);
+      border: 1px solid rgba(74, 200, 100, .2)
+    }
+
+    .msg.a .mb {
+      background: var(--surface);
+      color: var(--txt);
+      border: 1px solid var(--border);
+      border-radius: var(--r) var(--r) var(--r) 4px
+    }
+
+    .typing {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 12px 15px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r) var(--r) var(--r) 4px;
+      width: fit-content
+    }
+
+    .dot {
+      width: 5px;
+      height: 5px;
+      background: var(--g);
+      border-radius: 50%;
+      animation: tp 1.3s infinite
+    }
+
+    .dot:nth-child(2) {
+      animation-delay: .15s
+    }
+
+    .dot:nth-child(3) {
+      animation-delay: .3s
+    }
+
+    @keyframes tp {
+
+      0%,
+      100% {
+        opacity: .2;
+        transform: scale(.8)
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1)
+      }
+    }
+
+    .input-row {
+      padding: 14px 18px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 9px;
+      align-items: flex-end
+    }
+
+    .input-row textarea {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--rs);
+      padding: 10px 13px;
+      color: var(--txt);
+      font-family: var(--fb);
+      font-size: 14px;
+      resize: none;
+      outline: none;
+      max-height: 110px;
+      line-height: 1.5;
+      transition: border-color .14s
+    }
+
+    .input-row textarea:focus {
+      border-color: var(--g)
+    }
+
+    .input-row textarea::placeholder {
+      color: var(--td)
+    }
+
+    .send-btn {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #2a7a3a, #4ac864);
+      border: none;
+      border-radius: var(--rs);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity .14s, transform .1s;
+      flex-shrink: 0;
+      box-shadow: 0 0 10px rgba(74, 200, 100, .22)
+    }
+
+    .send-btn:hover {
+      opacity: .85
+    }
+
+    .send-btn:active {
+      transform: scale(.95)
+    }
+
+    .send-btn:disabled {
+      opacity: .35;
+      cursor: not-allowed
+    }
+
+    .send-btn svg {
+      fill: white;
+      width: 17px;
+      height: 17px
+    }
+
+    /* GUIDE */
+    .ph {
+      margin-bottom: 22px
+    }
+
+    .ph h2 {
+      font-family: var(--fd);
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--txt);
+      letter-spacing: -.5px;
+      margin-bottom: 5px
+    }
+
+    .ph p {
+      font-size: 13px;
+      color: var(--tm)
+    }
+
+    .abar {
+      padding: 11px 15px;
+      border-radius: var(--rs);
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 22px;
+      border-left: 3px solid;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px
+    }
+
+    .abar.heat {
+      background: var(--amb-bg);
+      color: var(--amb);
+      border-color: var(--amb)
+    }
+
+    .abar.flood {
+      background: var(--blue-bg);
+      color: var(--blue);
+      border-color: var(--blue)
+    }
+
+    .abar.rain {
+      background: rgba(74, 156, 245, .08);
+      color: #7ab8f5;
+      border-color: #7ab8f5
+    }
+
+    .abar.huri {
+      background: var(--red-bg);
+      color: var(--red);
+      border-color: var(--red)
+    }
+
+    .abar.cli {
+      background: var(--gg);
+      color: var(--g);
+      border-color: var(--g)
+    }
+
+    .slbl {
+      font-family: var(--fd);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--td);
+      margin-bottom: 11px
+    }
+
+    .cgrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 10px;
+      margin-bottom: 26px
+    }
+
+    .tc {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 15px;
+      transition: border-color .2s, transform .2s
+    }
+
+    .tc:hover {
+      border-color: var(--border-b);
+      transform: translateY(-2px)
+    }
+
+    .tc .ti {
+      font-size: 22px;
+      margin-bottom: 8px
+    }
+
+    .tc .tt {
+      font-family: var(--fd);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--txt);
+      margin-bottom: 4px
+    }
+
+    .tc .td2 {
+      font-size: 12px;
+      color: var(--tm);
+      line-height: 1.5
+    }
+
+    .slist {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      margin-bottom: 26px
+    }
+
+    .si {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 13px 15px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r)
+    }
+
+    .sn {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--fd);
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+      color: white
+    }
+
+    .st {
+      font-size: 13px;
+      color: var(--tm);
+      line-height: 1.55;
+      padding-top: 2px
+    }
+
+    .st strong {
+      color: var(--txt);
+      font-weight: 500
+    }
+
+    .aabtn {
+      width: 100%;
+      padding: 13px 18px;
+      background: var(--gg);
+      border: 1px solid var(--border-b);
+      border-radius: var(--r);
+      color: var(--g);
+      font-family: var(--fd);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background .14s
+    }
+
+    .aabtn:hover {
+      background: rgba(74, 200, 100, .2)
+    }
+
+    .agrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 10px;
+      margin-bottom: 26px
+    }
+
+    .ac {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 16px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      transition: border-color .2s
+    }
+
+    .ac:hover {
+      border-color: var(--border-b)
+    }
+
+    .ai2 {
+      font-size: 24px;
+      flex-shrink: 0
+    }
+
+    .at {
+      font-family: var(--fd);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--txt);
+      margin-bottom: 3px
+    }
+
+    .ad {
+      font-size: 12px;
+      color: var(--tm);
+      line-height: 1.5
+    }
+
+    .ib {
+      display: inline-block;
+      margin-top: 5px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      font-family: var(--fd);
+      letter-spacing: .3px
+    }
+
+    .ih {
+      background: rgba(240, 84, 84, .15);
+      color: #f07070
+    }
+
+    .im {
+      background: var(--amb-bg);
+      color: var(--amb)
+    }
+
+    .il {
+      background: var(--gg);
+      color: var(--g)
+    }
+
+    footer {
+      margin-top: 44px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px
+    }
+
+    footer p {
+      font-size: 11px;
+      color: var(--td)
+    }
+
+    footer a {
+      color: var(--g);
+      text-decoration: none
+    }
+
+    ::-webkit-scrollbar {
+      width: 4px
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px
+    }
+
+    @media(max-width:640px) {
+      .nav-grid {
+        grid-template-columns: repeat(4, 1fr)
+      }
+
+      .ph h2 {
+        font-size: 22px
+      }
+
+      .cgrid {
+        grid-template-columns: repeat(2, 1fr)
+      }
+
+      .agrid {
+        grid-template-columns: 1fr
+      }
+
+      .messages {
+        height: 300px
+      }
+
+      .earth-banner {
+        grid-template-columns: repeat(2, 1fr)
+      }
+
+      .weather-strip {
+        flex-direction: column;
+        align-items: flex-start
+      }
+
+      .weather-right {
+        align-items: flex-start;
+        width: 100%
+      }
+
+      .city-row {
+        width: 100%
+      }
+
+      .city-input {
+        flex: 1;
+        width: auto
+      }
+
+      .weather-stats {
+        gap: 14px
+      }
+
+      .input-row {
+        padding: 10px 12px;
+        gap: 7px
+      }
+
+      .chat-hdr {
+        padding: 12px 14px
+      }
+
+      .chips-row {
+        padding: 8px 12px
+      }
+
+      .messages {
+        padding: 12px
+      }
+
+      .hdr-right {
+        gap: 7px
+      }
+    }
+
+    @media(max-width:420px) {
+      .wrap {
+        padding: 0 10px 60px
+      }
+
+      header {
+        padding: 12px 0 10px;
+        gap: 8px
+      }
+
+      .logo-ico {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px
+      }
+
+      .logo-ico svg {
+        width: 18px;
+        height: 18px
+      }
+
+      .logo-txt h1 {
+        font-size: 16px
+      }
+
+      .logo-txt span {
+        font-size: 10px
+      }
+
+      .lang-select {
+        font-size: 11px;
+        padding: 4px 7px
+      }
+
+      .live-badge {
+        padding: 4px 9px;
+        font-size: 10px
+      }
+
+      .nav-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 5px
+      }
+
+      .nav-card {
+        padding: 10px 4px
+      }
+
+      .nav-card .ni {
+        font-size: 19px;
+        margin-bottom: 4px
+      }
+
+      .nav-card .nl {
+        font-size: 10px
+      }
+
+      .earth-card .ec-val {
+        font-size: 22px
+      }
+
+      .earth-card .ec-lbl {
+        font-size: 11px
+      }
+
+      .earth-card .ec-sub {
+        font-size: 10px
+      }
+
+      .weather-main h2 {
+        font-size: 24px
+      }
+
+      .weather-icon {
+        font-size: 30px
+      }
+
+      .wstat .wval {
+        font-size: 14px
+      }
+
+      .wstat .wlbl {
+        font-size: 10px
+      }
+
+      .messages {
+        height: 260px;
+        padding: 10px
+      }
+
+      .msg .mb {
+        padding: 9px 12px;
+        font-size: 13px
+      }
+
+      .input-row textarea {
+        font-size: 13px;
+        padding: 8px 10px
+      }
+
+      .send-btn {
+        width: 36px;
+        height: 36px
+      }
+
+      .aabtn {
+        padding: 11px 14px;
+        font-size: 12px
+      }
+
+      .ph h2 {
+        font-size: 19px
+      }
+
+      .slbl {
+        font-size: 9px
+      }
+
+      .tc {
+        padding: 12px
+      }
+
+      .tc .tt {
+        font-size: 12px
+      }
+
+      .tc .td2 {
+        font-size: 11px
+      }
+    }
+
+    /* QUIZ HERO FEATURE */
+    .neon-border-green {
+      border-color: #39FF14 !important;
+      box-shadow: 0 0 12px rgba(57, 255, 20, 0.4);
+    }
+    .neon-border-green .nl {
+      color: #39FF14 !important;
+    }
+    .quiz-progress-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: #39FF14;
+      width: 0%;
+      transition: width 0.3s;
+    }
+    .quiz-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .quiz-modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .quiz-modal {
+      background: rgba(10, 10, 10, 0.85);
+      border: 1px solid rgba(57, 255, 20, 0.5);
+      box-shadow: 0 0 25px rgba(57, 255, 20, 0.25);
+      border-radius: 16px;
+      width: 90%;
+      max-width: 400px;
+      padding: 24px;
+      color: white;
+      text-align: center;
+      position: relative;
+      transform: translateY(20px);
+      transition: transform 0.3s;
+      backdrop-filter: blur(15px);
+    }
+    .quiz-modal-overlay.active .quiz-modal {
+      transform: translateY(0);
+    }
+    .quiz-close {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      cursor: pointer;
+      font-size: 24px;
+      color: #aaa;
+      line-height: 1;
+    }
+    .quiz-close:hover {
+      color: white;
+    }
+    .quiz-question {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 20px;
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+    .quiz-btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 10px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: var(--fb);
+    }
+    .quiz-btn:hover {
+      background: rgba(57, 255, 20, 0.1);
+      border-color: #39FF14;
+    }
+    .quiz-result {
+      display: none;
+    }
+    .climate-warrior-badge {
+      font-size: 50px;
+      text-shadow: 0 0 15px #39FF14;
+      margin: 15px 0;
+      animation: glow 1.5s infinite alternate;
+    }
+    @keyframes glow {
+      from { text-shadow: 0 0 10px #39FF14; transform: scale(1); }
+      to { text-shadow: 0 0 25px #39FF14; transform: scale(1.1); }
+    }
+    .streak-text {
+      font-size: 13px;
+      color: #aaa;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <video id="bg-video" autoplay loop muted playsinline style="position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; background-color: #0a0a0a;">
+    <source src="https://cdn.pixabay.com/vimeo/147112028/clouds-1154.mp4?width=1280" type="video/mp4">
+  </video>
+  <div class="wrap">
+
+    <!-- HEADER -->
+    <header>
+      <div class="logo-g">
+        <div class="logo-ico">
+          <svg viewBox="0 0 24 24">
+            <path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 0 0 8 20c9 0 11-10 11-10l-1-4-1 2z" />
+            <path d="M19 4c0 2-2 4-4 4S11 6 11 4s2-4 4-4 4 2 4 4z" opacity=".5" />
+          </svg>
+        </div>
+        <div class="logo-txt">
+          <h1 id="appTitle">ClimateGuard AI</h1>
+          <span id="appSubtitle">Survive Smarter · Act Faster · Stay Safe</span>
+        </div>
+      </div>
+      <div class="hdr-right">
+        <select class="lang-select" id="langSel" onchange="changeLang(this.value)">
+          <option value="en">🌐 English</option>
+          <option value="hi">🇮🇳 हिंदी</option>
+          <option value="mr">महाराष्ट्र मराठी</option>
+          <option value="ta">தமிழ்</option>
+          <option value="te">తెలుగు</option>
+          <option value="bn">বাংলা</option>
+          <option value="gu">ગુજરાતી</option>
+          <option value="kn">ಕನ್ನಡ</option>
+        </select>
+        <div class="live-badge">
+          <div class="live-dot"></div><span id="aiStatus">AI Online</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- WEATHER STRIP -->
+    <div class="weather-strip">
+      <div class="weather-left">
+        <div class="weather-icon" id="wIcon">🌤️</div>
+        <div class="weather-main">
+          <h2 id="wTemp">--°C</h2>
+          <p id="wDesc">Fetching weather...</p>
+        </div>
+      </div>
+      <div class="weather-stats">
+        <div class="wstat">
+          <div class="wval" id="wFeel">--°C</div>
+          <div class="wlbl" id="lblFeels">Feels Like</div>
+        </div>
+        <div class="wstat">
+          <div class="wval" id="wHum">--%</div>
+          <div class="wlbl" id="lblHumidity">Humidity</div>
+        </div>
+        <div class="wstat">
+          <div class="wval" id="wWind">-- km/h</div>
+          <div class="wlbl" id="lblWind">Wind</div>
+        </div>
+        <div class="wstat">
+          <div class="wval" id="wVis">-- km</div>
+          <div class="wlbl" id="lblVisibility">Visibility</div>
+        </div>
+      </div>
+      <div class="weather-right">
+        <div class="city-row">
+          <input class="city-input" id="cityInput" placeholder="Enter city..."
+            onkeydown="if(event.key==='Enter')fetchWeather()">
+          <button class="city-btn" onclick="fetchWeather()" id="lblSearch">Search</button>
+          <button class="city-btn" onclick="geoWeather()" title="Use my location">📍</button>
+        </div>
+        <div id="wLocation" style="font-size:12px;color:var(--tm)">Detecting location...</div>
+        <div id="wTime" style="font-size:11px;color:var(--td)"></div>
+      </div>
+    </div>
+
+    <!-- EARTH TEMP BANNER -->
+    <div class="earth-banner">
+      <div class="earth-card red">
+        <div class="ec-val" id="valAnomaly">+1.32°C</div>
+        <div class="ec-lbl" id="lblAnomaly">Global Temp Anomaly</div>
+        <div class="ec-sub">vs. 1880 baseline · 2024 record</div>
+      </div>
+      <div class="earth-card amb">
+        <div class="ec-val" id="valCO2">422 ppm</div>
+        <div class="ec-lbl" id="lblCO2">Atmospheric CO₂</div>
+        <div class="ec-sub">Highest in 3 million years</div>
+      </div>
+      <div class="earth-card blue">
+        <div class="ec-val" id="seaIce">--</div>
+        <div class="ec-lbl" id="lblSeaIce">Arctic Sea Ice</div>
+        <div class="ec-sub" id="seaIceSub">Loading...</div>
+      </div>
+      <div class="earth-card g">
+        <div class="ec-val" id="heatDays">↑ 38</div>
+        <div class="ec-lbl" id="lblHeatDays">Extra Heat Days/yr</div>
+        <div class="ec-sub">South Asia avg since 2000</div>
+      </div>
+    </div>
+
+    <!-- NAV -->
+    <div class="nav-grid">
+      <div class="nav-card active" onclick="sw('ai')"><span class="ni">🤖</span>
+        <div class="nl" id="nav0">AI Chat</div>
+      </div>
+      <div class="nav-card" onclick="sw('heat')"><span class="ni">🌡️</span>
+        <div class="nl" id="nav1">Heat</div>
+      </div>
+      <div class="nav-card" onclick="sw('flood')"><span class="ni">🌊</span>
+        <div class="nl" id="nav2">Floods</div>
+      </div>
+      <div class="nav-card" onclick="sw('rain')"><span class="ni">⛈️</span>
+        <div class="nl" id="nav3">Rain</div>
+      </div>
+      <div class="nav-card" onclick="sw('huri')"><span class="ni">🌀</span>
+        <div class="nl" id="nav4">Cyclone</div>
+      </div>
+      <div class="nav-card" onclick="sw('cli')"><span class="ni">🌍</span>
+        <div class="nl" id="nav5">Climate</div>
+      </div>
+      <div class="nav-card neon-border-green" onclick="openQuizModal()" style="position: relative;">
+        <span class="ni">🌱</span>
+        <div class="nl">Daily Impact Quiz</div>
+        <div class="quiz-progress-bar" id="quizProgress"></div>
+      </div>
+      <div class="nav-card" onclick="sw('kit')"><span class="ni">🎒</span>
+        <div class="nl" id="nav6">Kit</div>
+      </div>
+    </div>
+
+    <!-- AI CHAT PANEL -->
+    <div id="panel-ai" class="panel active">
+      <div class="chat-box">
+        <div class="chat-hdr">
+          <div class="chat-hdr-ico">🤖</div>
+          <div class="chat-hdr-info">
+            <h3 id="chatTitle">ClimateGuard AI Assistant</h3>
+            <p id="chatSubtitle">Powered by Claude · Ask in your language</p>
+          </div>
+        </div>
+        <div class="chips-row" id="quickChips">
+          <div class="chip" onclick="fq('उन्हाळा')">🌡️ उन्हाळा</div>
+          <div class="chip" onclick="fq('उष्माघात')">🥵 उष्माघात</div>
+          <div class="chip" onclick="fq('पाऊस')">⛈️ पाऊस</div>
+          <div class="chip" onclick="fq('पाणी')">💧 पाणी</div>
+          <div class="chip" onclick="fq('प्रदूषण')">🌫️ प्रदूषण</div>
+          <div class="chip" onclick="fqWeather()">📍 Weather advice</div>
+        </div>
+        <div class="messages" id="chatBox">
+          <div class="msg a">
+            <div class="ml">CLIMATEGUARD AI</div>
+            <div class="mb" id="welcomeMsg">👋 Welcome! I'm your AI climate survival assistant. Ask me anything in your
+              preferred language — I support English, Hindi, Marathi, Tamil, Telugu, Bengali, Gujarati, and Kannada. 🌿
+            </div>
+          </div>
+        </div>
+        <div class="input-row">
+          <textarea id="msgIn" rows="1" placeholder="Ask about survival, weather, or climate..." onkeydown="hk(event)"
+            oninput="ag(this)"></textarea>
+          <button class="send-btn" id="sendBtn" onclick="send()">
+            <svg viewBox="0 0 24 24">
+              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HEAT PANEL -->
+    <div id="panel-heat" class="panel">
+      <div class="ph">
+        <h2>🌡️ <span id="h_title">Extreme Heat Survival</span></h2>
+        <p id="h_sub">Stay alive when temperatures soar above 40°C</p>
+      </div>
+      <div class="abar heat" id="h_alert">⚠️ Heat stroke can kill in under 15 minutes at 45°C+ — act before symptoms
+        appear</div>
+      <div class="slbl" id="h_s1">Survival Essentials</div>
+      <div class="cgrid">
+        <div class="tc">
+          <div class="ti">💧</div>
+          <div class="tt" id="h_c1t">Hydrate aggressively</div>
+          <div class="td2" id="h_c1d">2–4 cups of water every hour. Add electrolytes. Avoid caffeine, alcohol, and
+            sugary drinks.</div>
+        </div>
+        <div class="tc">
+          <div class="ti">🏠</div>
+          <div class="tt" id="h_c2t">Create cool zones</div>
+          <div class="td2" id="h_c2d">Block sunlight with thick curtains. Wet sheets on windows. Lowest floor stays
+            coolest.</div>
+        </div>
+        <div class="tc">
+          <div class="ti">🧊</div>
+          <div class="tt" id="h_c3t">Cool your core</div>
+          <div class="td2" id="h_c3d">Ice packs on neck, wrists, ankles. A cool shower every 2 hours reduces core
+            temperature.</div>
+        </div>
+        <div class="tc">
+          <div class="ti">👕</div>
+          <div class="tt" id="h_c4t">Dress for survival</div>
+          <div class="td2" id="h_c4d">Loose, light-colored, breathable cotton. Wide-brimmed hat and UV sunglasses when
+            outdoors.</div>
+        </div>
+      </div>
+      <div class="slbl" id="h_s2">Emergency Steps if Someone Collapses</div>
+      <div class="slist">
+        <div class="si">
+          <div class="sn" style="background:#f5a623">1</div>
+          <div class="st"><strong id="h_step1t">Move to shade or A/C immediately.</strong> <span id="h_step1d">Never
+              leave them alone. Call 108 (India emergency).</span></div>
+        </div>
+        <div class="si">
+          <div class="sn" style="background:#f5a623">2</div>
+          <div class="st"><strong id="h_step2t">Cool rapidly</strong> — <span id="h_step2d">cold wet cloths, ice packs
+              on neck, armpits, and groin area.</span></div>
+        </div>
+        <div class="si">
+          <div class="sn" style="background:#f5a623">3</div>
+          <div class="st"><strong id="h_step3t">Do NOT give fluids to unconscious person.</strong> <span
+              id="h_step3d">Fan them, remove excess clothing, wait for emergency services.</span></div>
+        </div>
+      </div>
+      <button class="aabtn"
+        onclick="goAI('Give me a complete extreme heat survival plan for a family with elderly members and children')"><span
+          id="h_aibtn">Ask AI for personalized heat survival plan</span> <span>↗</span></button>
+    </div>
+
+    <!-- FLOOD PANEL -->
+    <div id="panel-flood" class="panel">
+      <div class="ph">
+        <h2>🌊 <span id="f_title">Flash Flood Survival</span></h2>
+        <p id="f_sub">Every second counts when water rises</p>
+      </div>
+      <div class="abar flood" id="f_alert">⚡ Floods can rise 3 metres in minutes. Never wait to evacuate when warned.
+      </div>
+      <div class="slbl">Immediate Actions</div>
+      <div class="cgrid">
+        <div class="tc">
+          <div class="ti">⬆️</div>
+          <div class="tt">Get to high ground now</div>
+          <div class="td2">Don't wait for water to stop rising. Move to the highest nearby ground immediately.</div>
+        </div>
+        <div class="tc">
+          <div class="ti">🚗</div>
+          <div class="tt">Abandon vehicles</div>
+          <div class="td2">30cm of moving water sweeps a car. Exit immediately and climb to higher ground.</div>
+        </div>
+        <div class="tc">
+          <div class="ti">⚡</div>
+          <div class="tt">Avoid electricity</div>
+          <div class="td2">Floodwater carries current. Stay far from panels, wires, and downed poles.</div>
+        </div>
+        <div class="tc">
+          <div class="ti">📻</div>
+          <div class="tt">Monitor IMD alerts</div>
+          <div class="td2">Battery radio. Follow every evacuation order. Never return until "all clear" is issued.</div>
+        </div>
+      </div>
+      <div class="slbl">Preparation Steps</div>
+      <div class="slist">
+        <div class="si">
+          <div class="sn" style="background:#4a9cf5">1</div>
+          <div class="st"><strong>Know your flood zone.</strong> Map nearest high ground and two evacuation routes from
+            home.</div>
+        </div>
+        <div class="si">
+          <div class="sn" style="background:#4a9cf5">2</div>
+          <div class="st"><strong>Pack a waterproof go-bag</strong> with 3 days of food, water, medicines, torch, and
+            vital documents.</div>
+        </div>
+        <div class="si">
+          <div class="sn" style="background:#4a9cf5">3</div>
+          <div class="st"><strong>Move valuables upstairs</strong> and raise electrical equipment off the ground floor
+            before monsoon.</div>
+        </div>
+      </div>
+      <button class="aabtn"
+        onclick="goAI('What should be in my flash flood emergency kit and how do I protect my home?')">Ask AI for
+        complete flood preparedness plan <span>↗</span></button>
+    </div>
+
+    <!-- RAIN PANEL -->
+    <div id="panel-rain" class="panel">
+      <div class="ph">
+        <h2>⛈️ <span>Heavy Rainfall Safety</span></h2>
+        <p>Monsoon & extreme rain survival for South Asia</p>
+      </div>
+      <div class="abar rain">🌧️ Waterlogged roads hide open manholes. Do not go out unless absolutely necessary.</div>
+      <div class="slbl">Safety During Heavy Rain</div>
+      <div class="cgrid">
+        <div class="tc">
+          <div class="ti">🏠</div>
+          <div class="tt">Stay indoors</div>
+          <div class="td2">Flooded roads hide manholes and potholes. Even knee-deep moving water can knock you over.
+          </div>
+        </div>
+        <div class="tc">
+          <div class="ti">⛰️</div>
+          <div class="tt">Avoid hillsides</div>
+          <div class="td2">Prolonged rain saturates soil — landslides occur without warning in hilly and coastal areas.
+          </div>
+        </div>
+        <div class="tc">
+          <div class="ti">🌳</div>
+          <div class="tt">Never under trees</div>
+          <div class="td2">Lightning strike + falling branches. A concrete structure is always safer during storms.
+          </div>
+        </div>
+        <div class="tc">
+          <div class="ti">📱</div>
+          <div class="tt">Charge everything</div>
+          <div class="td2">Keep devices at 100%. Download offline maps. Save numbers: 100 (police), 101 (fire), 108
+            (ambulance).</div>
+        </div>
+      </div>
+      <div class="slbl">If Caught Outdoors</div>
+      <div class="slist">
+        <div class="si">
+          <div class="sn" style="background:#7ab8f5">1</div>
+          <div class="st"><strong>Find solid concrete shelter</strong> — not a canopy or tin shed. Lower your profile in
+            open spaces.</div>
+        </div>
+        <div class="si">
+          <div class="sn" style="background:#7ab8f5">2</div>
+          <div class="st"><strong>Never walk in flowing water</strong> — fast-moving shin-deep water creates enough
+            force to knock an adult down.</div>
+        </div>
+        <div class="si">
+          <div class="sn" style="background:#7ab8f5">3</div>
+          <div class="st"><strong>Alert family of your location</strong> before conditions worsen. Call early, not when
+            already in danger.</div>
+        </div>
+      </div>
+      <button class="aabtn"
+        onclick="goAI('How do I monsoon-proof my home and prepare my family for the heavy rainfall season in India?')">Ask
+        AI for monsoon-proofing guide <span>↗</span></button>
+    </div>
+
+    <!-- HURRICANE PANEL -->
+    <div id="panel-huri" class="panel">
+      <div class="ph">
+        <h2>🌀 <span>Hurricane & Cyclone Survival</span></h2>
+        <p>Preparation is the difference between life and death</p>
+      </div>
+      <div class="abar huri">🚨 Category 3+ storms bring 180+ km/h winds and 4–6m storm surges. Evacuate coastal areas
+        immediately.</div>
+      <div class="slbl">72-Hour Preparation Window</div>
+      <div class="cgrid">
+        <div class="tc">
+          <div class="ti">🪟</div>
+          <div class="tt">Board up windows</div>
+          <div class="td2">Plywood or storm shutters only. Tape is a dangerous myth — it does not prevent shattering.
+          </div>
+        </div>
+        <div class="tc">
+          <div class="ti">🍱</div>
+          <div class="tt">Stock 7 days of supplies</div>
+          <div class="td2">Non-perishable food, 1 gallon water per person per day, medications and full first-aid kit.
+          </div>
+        </div>
+        <div class="tc">
+          <div class="ti">🔋</div>
+          <div class="tt">Power backup</div>
+          <div class="td2">Charged power banks, LED torches, battery radio, and a fueled generator stored outdoors.
+          </div>
+        </div>
+        <div class="tc">
+          <div class="ti">📄</div>
+          <div class="tt">Secure documents</div>
+          <div class="td2">Aadhaar, insurance, medical records in a sealed waterproof bag. Know 2 evacuation routes.
+          </div>
+        </div>
+      </div>
+      <div class="slbl">During the Storm</div>
+      <div class="slist">
+        <div class="si">
+          <div class="sn" style="background:#f05454">1</div>
+          <div class="st"><strong>Stay in interior rooms,</strong> away from all windows. Lowest safe floor unless
+            flooding is expected.</div>
+        </div>
+        <div class="si">
+          <div class="sn" style="background:#f05454">2</div>
+          <div class="st"><strong>Never go outside in the eye.</strong> The calm is temporary — the back wall is often
+            even stronger.</div>
+        </div>
+        <div class="si">
+          <div class="sn" style="background:#f05454">3</div>
+          <div class="st"><strong>Stay off roads 24+ hours after.</strong> Downed power lines are invisible beneath
+            floodwater.</div>
+        </div>
+      </div>
+      <button class="aabtn"
+        onclick="goAI('Create a complete cyclone preparedness checklist for a coastal family in India')">Ask AI for a
+        full cyclone checklist <span>↗</span></button>
+    </div>
+
+    <!-- CLIMATE PANEL -->
+    <div id="panel-cli" class="panel">
+      <div class="ph">
+        <h2>🌍 <span>Climate Action Guide</span></h2>
+        <p>What you can do today to slow the crisis</p>
+      </div>
+      <div class="abar cli">🌡️ Earth has warmed +1.32°C already. Every 0.1°C avoided saves thousands of lives.</div>
+      <div class="slbl">Highest-Impact Personal Actions</div>
+      <div class="agrid">
+        <div class="ac">
+          <div class="ai2">🌿</div>
+          <div>
+            <div class="at">Eat less meat & dairy</div>
+            <div class="ad">Livestock causes 14.5% of global emissions. Two meat-free days/week cuts food footprint by
+              30%.</div>
+            <div class="ib ih">High impact</div>
+          </div>
+        </div>
+        <div class="ac">
+          <div class="ai2">✈️</div>
+          <div>
+            <div class="at">Reduce flights</div>
+            <div class="ad">One long-haul flight emits more CO₂ than months of driving. Choose trains for domestic
+              travel.</div>
+            <div class="ib ih">High impact</div>
+          </div>
+        </div>
+        <div class="ac">
+          <div class="ai2">☀️</div>
+          <div>
+            <div class="at">Switch to solar</div>
+            <div class="ad">Rooftop solar in India pays back in 4–5 years. LEDs use 75% less energy than incandescent.
+            </div>
+            <div class="ib ih">High impact</div>
+          </div>
+        </div>
+        <div class="ac">
+          <div class="ai2">🚲</div>
+          <div>
+            <div class="at">Active transport</div>
+            <div class="ad">Walk, cycle, or take public transit. Transport is 16% of global emissions.</div>
+            <div class="ib im">Medium impact</div>
+          </div>
+        </div>
+        <div class="ac">
+          <div class="ai2">🌳</div>
+          <div>
+            <div class="at">Plant & protect trees</div>
+            <div class="ad">One mature tree absorbs ~22 kg CO₂/year. Join local drives. Never burn agricultural waste.
+            </div>
+            <div class="ib im">Medium impact</div>
+          </div>
+        </div>
+        <div class="ac">
+          <div class="ai2">🗳️</div>
+          <div>
+            <div class="at">Vote for climate</div>
+            <div class="ad">Individual action matters, but policy change is 10× more impactful. Support climate-aware
+              leaders.</div>
+            <div class="ib ih">High impact</div>
+          </div>
+        </div>
+      </div>
+      <button class="aabtn"
+        onclick="goAI('Give me a personalized 30-day climate action plan with realistic daily habits I can start this week')">Ask
+        AI for my 30-day climate plan <span>↗</span></button>
+    </div>
+
+    <!-- KIT PANEL -->
+    <div id="panel-kit" class="panel">
+      <div class="ph">
+        <h2>🎒 <span>Emergency Survival Kit</span></h2>
+        <p>Every family needs this ready before disaster strikes</p>
+      </div>
+      <div class="abar cli">✅ Build your kit before emergency season. 72 hours of self-sufficiency is the standard goal.
+      </div>
+      <div class="slbl">Essential Items</div>
+      <div class="cgrid" style="grid-template-columns:repeat(auto-fit,minmax(190px,1fr))">
+        <div class="tc">
+          <div class="ti">💧</div>
+          <div class="tt">Water</div>
+          <div class="td2">4 litres per person per day. Purification tablets and a filter bottle as backup.</div>
+        </div>
+        <div class="tc">
+          <div class="ti">🥫</div>
+          <div class="tt">Food</div>
+          <div class="td2">Non-perishable: canned goods, dry biscuits, trail mix, instant oats — minimum 3 days.</div>
+        </div>
+        <div class="tc">
+          <div class="ti">💊</div>
+          <div class="tt">Medical</div>
+          <div class="td2">First aid kit, all prescriptions (30-day supply), ORS packets, thermometer, BP monitor.</div>
+        </div>
+        <div class="tc">
+          <div class="ti">🔦</div>
+          <div class="tt">Power & light</div>
+          <div class="td2">LED torch + batteries, 20,000mAh power bank, battery-powered radio for alerts.</div>
+        </div>
+        <div class="tc">
+          <div class="ti">📄</div>
+          <div class="tt">Documents</div>
+          <div class="td2">Aadhaar, passport, insurance, bank details in a sealed waterproof zip-lock bag.</div>
+        </div>
+        <div class="tc">
+          <div class="ti">🧰</div>
+          <div class="tt">Tools & extras</div>
+          <div class="td2">Whistle, multi-tool, N95 masks, waterproof poncho, cash in small denominations.</div>
+        </div>
+      </div>
+      <button class="aabtn"
+        onclick="goAI('Build a complete emergency kit checklist for a family of 4 in India including one elderly parent and a young child')">Ask
+        AI to build my custom kit list <span>↗</span></button>
+    </div>
+
+    <!-- QUIZ MODAL -->
+    <div class="quiz-modal-overlay" id="quizModalOverlay">
+      <div class="quiz-modal">
+        <div class="quiz-close" onclick="closeQuizModal()">&times;</div>
+        
+        <div id="quizContent">
+          <div style="font-size: 32px; margin-bottom: 5px;">🌱</div>
+          <h3 style="margin-bottom: 10px; font-family: var(--fd);">Daily Impact Quiz</h3>
+          <div class="quiz-question" id="quizQuestion">Question here</div>
+          <div id="quizButtons">
+            <!-- Buttons injected by JS -->
+          </div>
+        </div>
+        
+        <div id="quizResult" class="quiz-result">
+          <h3 style="font-family: var(--fd); margin-bottom: 10px;">Quiz Completed!</h3>
+          <p id="co2SavedMsg" style="font-size: 16px; margin-bottom: 15px;">You saved <strong>0 kg</strong> CO₂ today! 🌱</p>
+          <div id="quizBadge" style="display: none;">
+            <div class="climate-warrior-badge">🏆</div>
+            <div style="color: #39FF14; font-weight: bold; font-family: var(--fd);">Climate Warrior!</div>
+          </div>
+          <div class="streak-text" id="streakMsg">7-Day Streak: 0 days🔥</div>
+          <button class="quiz-btn" style="margin-top: 20px; background: #39FF14; color: black; font-weight: bold;" onclick="closeQuizModal()">Awesome!</button>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>ClimateGuard AI · Powered by <a href="https://anthropic.com" target="_blank">Claude (Anthropic)</a> · Weather
+        by <a href="https://wttr.in" target="_blank">wttr.in</a></p>
+      <p>Emergency: <strong style="color:var(--red)">108</strong> · Police: <strong
+          style="color:var(--red)">100</strong> · Fire: <strong style="color:var(--red)">101</strong> · Disaster:
+        <strong style="color:var(--red)">1078</strong>
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    // ── CLIMATE DATA & QUIZ LOGIC ──────────────────────────────────
+    function simulateClimateData() {
+      const anomalyEl = document.getElementById('valAnomaly');
+      const co2El = document.getElementById('valCO2');
+      const iceEl = document.getElementById('seaIce');
+      
+      if(anomalyEl) anomalyEl.textContent = 'Loading...';
+      if(co2El) co2El.textContent = 'Loading...';
+      if(iceEl) iceEl.textContent = 'Loading...';
+      
+      setTimeout(() => {
+        if(anomalyEl) anomalyEl.innerHTML = '+1.32&deg;C';
+        if(co2El) co2El.textContent = '422 ppm';
+        if(iceEl && iceEl.textContent === 'Loading...') iceEl.textContent = '14.5M km²';
+      }, 1500);
+    }
+
+    const quizPool = [
+      { category: 'Transport', question: "How did you commute today?", answers: [ { text: "Walk / Cycle", score: 0.5 }, { text: "Bus / Public Transit", score: 0.3 }, { text: "Personal Car", score: 0 } ] },
+      { category: 'Energy', question: "How much AC did you use today?", answers: [ { text: "No AC", score: 0.4 }, { text: "< 1 hour", score: 0.2 }, { text: "3+ hours", score: -0.2 } ] },
+      { category: 'Food', question: "What was your main meal type today?", answers: [ { text: "Vegetarian / Vegan", score: 0.3 }, { text: "Non-Vegetarian", score: 0 } ] },
+      { category: 'Lifestyle', question: "Did you use reusable bags while shopping?", answers: [ { text: "Yes, always", score: 0.2 }, { text: "Forgot them", score: 0 } ] },
+      { category: 'Transport', question: "Did you carpool or share a ride today?", answers: [ { text: "Yes, shared ride", score: 0.3 }, { text: "No, traveled alone", score: 0 } ] },
+      { category: 'Energy', question: "Did you turn off lights in empty rooms?", answers: [ { text: "Yes, always", score: 0.2 }, { text: "Sometimes", score: 0.1 }, { text: "Forgot to", score: 0 } ] }
+    ];
+
+    let currentQuizQuestions = [];
+    let currentQuestionIndex = 0;
+    let totalSavedCO2 = 0;
+
+    function openQuizModal() {
+      const shuffled = [...quizPool].sort(() => 0.5 - Math.random());
+      currentQuizQuestions = shuffled.slice(0, 3);
+      currentQuestionIndex = 0;
+      totalSavedCO2 = 0;
+      document.getElementById('quizProgress').style.width = '0%';
+      
+      document.getElementById('quizModalOverlay').classList.add('active');
+      document.getElementById('quizResult').style.display = 'none';
+      document.getElementById('quizContent').style.display = 'block';
+      
+      showQuestion();
+    }
+
+    function closeQuizModal() {
+      document.getElementById('quizModalOverlay').classList.remove('active');
+    }
+
+    function showQuestion() {
+      const progressPercent = (currentQuestionIndex / 3) * 100;
+      document.getElementById('quizProgress').style.width = `${progressPercent}%`;
+
+      if (currentQuestionIndex >= currentQuizQuestions.length) {
+        showQuizResult();
+        return;
+      }
+      
+      const q = currentQuizQuestions[currentQuestionIndex];
+      document.getElementById('quizQuestion').textContent = `Q${currentQuestionIndex + 1}: ${q.question}`;
+      
+      const btnContainer = document.getElementById('quizButtons');
+      btnContainer.innerHTML = '';
+      q.answers.forEach(ans => {
+        const btn = document.createElement('button');
+        btn.className = 'quiz-btn';
+        btn.textContent = ans.text;
+        btn.onclick = () => handleAnswer(ans.score);
+        btnContainer.appendChild(btn);
+      });
+    }
+
+    function handleAnswer(score) {
+      totalSavedCO2 += score;
+      currentQuestionIndex++;
+      showQuestion();
+    }
+
+    function showQuizResult() {
+      document.getElementById('quizContent').style.display = 'none';
+      document.getElementById('quizResult').style.display = 'block';
+      document.getElementById('quizProgress').style.width = `100%`;
+      
+      totalSavedCO2 = Math.max(0, parseFloat(totalSavedCO2.toFixed(2)));
+      document.getElementById('co2SavedMsg').innerHTML = `You saved <strong>${totalSavedCO2} kg</strong> CO₂ today! 🌱`;
+      
+      const badgeEl = document.getElementById('quizBadge');
+      if (totalSavedCO2 > 1.0) {
+        badgeEl.style.display = 'block';
+        if (typeof confetti === 'function') {
+          confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, zIndex: 10000 });
+        }
+      } else {
+        badgeEl.style.display = 'none';
+      }
+      
+      let streak = parseInt(localStorage.getItem('climateStreak') || '0');
+      let lastDate = localStorage.getItem('climateLastDate');
+      const today = new Date().toDateString();
+      
+      if (lastDate !== today) {
+        streak++;
+        localStorage.setItem('climateLastDate', today);
+        localStorage.setItem('climateStreak', streak);
+      }
+      
+      document.getElementById('streakMsg').textContent = `7-Day Streak: ${streak} days🔥`;
+    }
+
+    // ── LANGUAGE DATA ──────────────────────────────────────────────
+    const L = {
+      en: {
+        appTitle: 'ClimateGuard AI', appSubtitle: 'Survive Smarter · Act Faster · Stay Safe',
+        aiStatus: 'AI Online', lblFeels: 'Feels Like', lblHumidity: 'Humidity', lblWind: 'Wind',
+        lblVisibility: 'Visibility', lblAnomaly: 'Global Temp Anomaly', lblCO2: 'Atmospheric CO₂',
+        lblSeaIce: 'Arctic Sea Ice', lblHeatDays: 'Extra Heat Days/yr',
+        nav: ['AI Chat', 'Heat', 'Floods', 'Rain', 'Cyclone', 'Climate', 'Kit'],
+        chatTitle: 'ClimateGuard AI Assistant', chatSubtitle: 'Powered by Claude · Ask in your language',
+        lblSearch: 'Search',
+        welcome: '👋 Welcome! I\'m your AI climate survival assistant. Ask me anything about extreme weather survival, emergency preparedness, or climate action. 🌿',
+        sysprompt: 'You are ClimateGuard AI, an expert climate survival guide. Respond in English. Help with extreme weather survival, emergency preparedness, and climate action. Be concise, warm, and give India-specific advice (IMD alerts, 108 emergency, monsoon season). Keep responses under 300 words unless a detailed plan is requested.'
+      },
+      hi: {
+        appTitle: 'क्लाइमेटगार्ड AI', appSubtitle: 'स्मार्ट बचाव · तेज़ कार्रवाई · सुरक्षित रहें',
+        aiStatus: 'AI ऑनलाइन', lblFeels: 'महसूस होता है', lblHumidity: 'आर्द्रता', lblWind: 'हवा',
+        lblVisibility: 'दृश्यता', lblAnomaly: 'वैश्विक तापमान बदलाव', lblCO2: 'वायुमंडलीय CO₂',
+        lblSeaIce: 'आर्कटिक समुद्री बर्फ', lblHeatDays: 'अतिरिक्त गर्म दिन/वर्ष',
+        nav: ['AI चैट', 'गर्मी', 'बाढ़', 'बारिश', 'चक्रवात', 'जलवायु', 'किट'],
+        chatTitle: 'ClimateGuard AI सहायक', chatSubtitle: 'Claude द्वारा · हिंदी में पूछें',
+        lblSearch: 'खोजें',
+        welcome: '👋 नमस्ते! मैं आपका AI जलवायु जीवन रक्षक सहायक हूँ। चरम मौसम, आपदा तैयारी या जलवायु कार्रवाई के बारे में हिंदी में पूछें। 🌿',
+        sysprompt: 'You are ClimateGuard AI. The user speaks Hindi. ALWAYS respond in Hindi (Devanagari script). Help with extreme weather survival, emergency preparedness, and climate action. Give India-specific advice. Be warm, concise, and practical.'
+      },
+      mr: {
+        appTitle: 'क्लायमेटगार्ड AI', appSubtitle: 'स्मार्ट वाचा · त्वरित कृती · सुरक्षित राहा',
+        aiStatus: 'AI ऑनलाइन', lblFeels: 'जाणवते', lblHumidity: 'आर्द्रता', lblWind: 'वारा',
+        lblVisibility: 'दृश्यमानता', lblAnomaly: 'जागतिक तापमान बदल', lblCO2: 'वातावरणीय CO₂',
+        lblSeaIce: 'आर्क्टिक बर्फ', lblHeatDays: 'अतिरिक्त उष्ण दिवस/वर्ष',
+        nav: ['AI चॅट', 'उष्णता', 'पूर', 'पाऊस', 'चक्रीवादळ', 'हवामान', 'किट'],
+        chatTitle: 'ClimateGuard AI सहाय्यक', chatSubtitle: 'Claude द्वारे · मराठीत विचारा',
+        lblSearch: 'शोधा',
+        welcome: '👋 नमस्कार! मी तुमचा AI हवामान जगण्याचा सहाय्यक आहे. अत्यंत हवामान, आपत्ती तयारी किंवा हवामान बदलाबद्दल मराठीत विचारा. 🌿',
+        sysprompt: 'You are ClimateGuard AI. The user speaks Marathi. ALWAYS respond in Marathi. Help with extreme weather survival and emergency preparedness in Maharashtra, India. Be warm and practical.'
+      },
+      ta: {
+        appTitle: 'கிளைமேட்கார்ட் AI', appSubtitle: 'புத்திசாலித்தனமாக உயிர் பிழைக்க',
+        aiStatus: 'AI இயங்குகிறது', lblFeels: 'உணர்வு', lblHumidity: 'ஈரப்பதம்', lblWind: 'காற்று',
+        lblVisibility: 'தெரிவுத்தன்மை', lblAnomaly: 'உலக வெப்பநிலை மாற்றம்', lblCO2: 'CO₂ அளவு',
+        lblSeaIce: 'ஆர்க்டிக் பனி', lblHeatDays: 'கூடுதல் வெப்ப நாட்கள்',
+        nav: ['AI சேட்', 'வெப்பம்', 'வெள்ளம்', 'மழை', 'புயல்', 'காலநிலை', 'கிட்'],
+        chatTitle: 'ClimateGuard AI உதவியாளர்', chatSubtitle: 'Claude மூலம் · தமிழில் கேளுங்கள்',
+        lblSearch: 'தேடு',
+        welcome: '👋 வணக்கம்! நான் உங்கள் AI காலநிலை உதவியாளர். தீவிர வானிலை, அவசர தயாரிப்பு பற்றி தமிழில் கேளுங்கள். 🌿',
+        sysprompt: 'You are ClimateGuard AI. The user speaks Tamil. ALWAYS respond in Tamil. Help with extreme weather survival, emergency preparedness in Tamil Nadu, India. Be warm and practical.'
+      },
+      te: {
+        appTitle: 'క్లైమేట్‌గార్డ్ AI', appSubtitle: 'తెలివిగా జీవించు · సురక్షితంగా ఉండు',
+        aiStatus: 'AI ఆన్‌లైన్', lblFeels: 'అనిపిస్తుంది', lblHumidity: 'తేమ', lblWind: 'గాలి',
+        lblVisibility: 'దృశ్యమానత', lblAnomaly: 'ప్రపంచ ఉష్ణోగ్రత మార్పు', lblCO2: 'CO₂ స్థాయి',
+        lblSeaIce: 'ఆర్కిటిక్ మంచు', lblHeatDays: 'అదనపు వేడి రోజులు',
+        nav: ['AI చాట్', 'వేడి', 'వరదలు', 'వర్షం', 'తుఫాను', 'వాతావరణం', 'కిట్'],
+        chatTitle: 'ClimateGuard AI సహాయకుడు', chatSubtitle: 'Claude ద్వారా · తెలుగులో అడగండి',
+        lblSearch: 'వెతకండి',
+        welcome: '👋 నమస్కారం! నేను మీ AI వాతావరణ సహాయకుడిని. తీవ్రమైన వాతావరణం గురించి తెలుగులో అడగండి. 🌿',
+        sysprompt: 'You are ClimateGuard AI. The user speaks Telugu. ALWAYS respond in Telugu. Help with extreme weather survival in Andhra Pradesh and Telangana, India. Be warm and practical.'
+      },
+      bn: {
+        appTitle: 'ক্লাইমেটগার্ড AI', appSubtitle: 'স্মার্টভাবে বাঁচুন · নিরাপদ থাকুন',
+        aiStatus: 'AI অনলাইন', lblFeels: 'অনুভূতি', lblHumidity: 'আর্দ্রতা', lblWind: 'বাতাস',
+        lblVisibility: 'দৃশ্যমানতা', lblAnomaly: 'বৈশ্বিক তাপমাত্রা পরিবর্তন', lblCO2: 'CO₂ স্তর',
+        lblSeaIce: 'আর্কটিক সমুদ্র বরফ', lblHeatDays: 'অতিরিক্ত গরম দিন/বছর',
+        nav: ['AI চ্যাট', 'গরম', 'বন্যা', 'বৃষ্টি', 'ঘূর্ণিঝড়', 'জলবায়ু', 'কিট'],
+        chatTitle: 'ClimateGuard AI সহকারী', chatSubtitle: 'Claude দ্বারা · বাংলায় জিজ্ঞেস করুন',
+        lblSearch: 'খুঁজুন',
+        welcome: '👋 নমস্কার! আমি আপনার AI জলবায়ু সহকারী। চরম আবহাওয়া বা দুর্যোগ প্রস্তুতি সম্পর্কে বাংলায় জিজ্ঞেস করুন। 🌿',
+        sysprompt: 'You are ClimateGuard AI. The user speaks Bengali. ALWAYS respond in Bengali. Help with extreme weather survival in West Bengal and Bangladesh. Be warm and practical.'
+      },
+      gu: {
+        appTitle: 'ક્લાઈમેટગાર્ડ AI', appSubtitle: 'સ્માર્ટ રીતે જીવો · સુરક્ષિત રહો',
+        aiStatus: 'AI ઑનલાઈન', lblFeels: 'લાગે છે', lblHumidity: 'ભેજ', lblWind: 'પવન',
+        lblVisibility: 'દૃશ્યતા', lblAnomaly: 'વૈશ્વિક તાપમાન ફેરફાર', lblCO2: 'CO₂ સ્તર',
+        lblSeaIce: 'આર્ક્ટિક બરફ', lblHeatDays: 'વધારાના ગરમ દિવસ',
+        nav: ['AI ચેટ', 'ગરમી', 'પૂર', 'વરસાદ', 'વાવાઝોડું', 'જળવાયુ', 'કિટ'],
+        chatTitle: 'ClimateGuard AI સહાયક', chatSubtitle: 'Claude દ્વારા · ગુજરાતીમાં પૂછો',
+        lblSearch: 'શોધો',
+        welcome: '👋 નમસ્તે! હું તમારો AI આબોહવા સહાયક છું. ભારે હવામાન અથવા આપત્તિ તૈયારી વિશે ગુજરાતીમાં પૂછો. 🌿',
+        sysprompt: 'You are ClimateGuard AI. The user speaks Gujarati. ALWAYS respond in Gujarati. Help with extreme weather survival in Gujarat, India. Be warm and practical.'
+      },
+      kn: {
+        appTitle: 'ಕ್ಲೈಮೇಟ್‌ಗಾರ್ಡ್ AI', appSubtitle: 'ಬುದ್ಧಿವಂತಿಕೆಯಿಂದ ಬದುಕಿ · ಸುರಕ್ಷಿತವಾಗಿರಿ',
+        aiStatus: 'AI ಆನ್‌ಲೈನ್', lblFeels: 'ಅನಿಸುತ್ತದೆ', lblHumidity: 'ತೇವಾಂಶ', lblWind: 'ಗಾಳಿ',
+        lblVisibility: 'ದೃಶ್ಯಮಾನತೆ', lblAnomaly: 'ಜಾಗತಿಕ ತಾಪಮಾನ ಬದಲಾವಣೆ', lblCO2: 'CO₂ ಮಟ್ಟ',
+        lblSeaIce: 'ಆರ್ಕ್ಟಿಕ್ ಮಂಜುಗಡ್ಡೆ', lblHeatDays: 'ಹೆಚ್ಚುವರಿ ಶಾಖ ದಿನಗಳು',
+        nav: ['AI ಚಾಟ್', 'ಶಾಖ', 'ಪ್ರವಾಹ', 'ಮಳೆ', 'ಚಂಡಮಾರುತ', 'ಹವಾಮಾನ', 'ಕಿಟ್'],
+        chatTitle: 'ClimateGuard AI ಸಹಾಯಕ', chatSubtitle: 'Claude ಮೂಲಕ · ಕನ್ನಡದಲ್ಲಿ ಕೇಳಿ',
+        lblSearch: 'ಹುಡುಕಿ',
+        welcome: '👋 ನಮಸ್ಕಾರ! ನಾನು ನಿಮ್ಮ AI ಹವಾಮಾನ ಸಹಾಯಕ. ತೀವ್ರ ಹವಾಮಾನ ಅಥವಾ ತುರ್ತು ತಯಾರಿ ಬಗ್ಗೆ ಕನ್ನಡದಲ್ಲಿ ಕೇಳಿ. 🌿',
+        sysprompt: 'You are ClimateGuard AI. The user speaks Kannada. ALWAYS respond in Kannada. Help with extreme weather survival in Karnataka, India. Be warm and practical.'
+      }
+    };
+
+    let curLang = 'en';
+    let history = [];
+    let busy = false;
+    let curWeather = null;
+
+    function t(key) { return (L[curLang] || L.en)[key] || (L.en)[key] || key; }
+
+    // Chip translations keyed by language
+    const chipTranslations = {
+      en: ['🌡️ उन्हाळा', '🥵 उष्माघात', '⛈️ पाऊस', '💧 पाणी', '🌫️ प्रदूषण', '📍 Weather advice'],
+      hi: ['🌡️ उन्हाळा', '🥵 उष्माघात', '⛈️ पाऊस', '💧 पाणी', '🌫️ प्रदूषण', '📍 मौसम सलाह'],
+      mr: ['🌡️ उन्हाळा', '🥵 उष्माघात', '⛈️ पाऊस', '💧 पाणी', '🌫️ प्रदूषण', '📍 हवामान सल्ला'],
+      ta: ['🌡️ उन्हाळा', '🥵 उष्माघात', '⛈️ पाऊस', '💧 पाणी', '🌫️ प्रदूषण', '📍 வானிலை அறிவுரை'],
+      te: ['🌡️ उन्हाळा', '🥵 उष्माघात', '⛈️ पाऊस', '💧 पाणी', '🌫️ प्रदूषण', '📍 వాతావరణ సలహా'],
+      bn: ['🌡️ उन्हाळा', '🥵 उष्माघात', '⛈️ पाऊस', '💧 पाणी', '🌫️ प्रदूषण', '📍 আবহাওয়া পরামর্শ'],
+      gu: ['🌡️ उन्हाळा', '🥵 उष्माघात', '⛈️ पाऊस', '💧 पाणी', '🌫️ प्रदूषण', '📍 હવામાન સલાહ'],
+      kn: ['🌡️ उन्हाळा', '🥵 उष्माघात', '⛈️ पाऊस', '💧 पाणी', '🌫️ प्रदूषण', '📍 ಹವಾಮಾನ ಸಲಹೆ']
+    };
+
+    // Quick chip question prompts by language
+    const chipQueries = {
+      en: ['उन्हाळा', 'उष्माघात', 'पाऊस', 'पाणी', 'प्रदूषण'],
+      hi: ['उन्हाळा', 'उष्माघात', 'पाऊस', 'पाणी', 'प्रदूषण'],
+      mr: ['उन्हाळा', 'उष्माघात', 'पाऊस', 'पाणी', 'प्रदूषण'],
+      ta: ['उन्हाळा', 'उष्माघात', 'पाऊस', 'पाणी', 'प्रदूषण'],
+      te: ['उन्हाळा', 'उष्माघात', 'पाऊस', 'पाणी', 'प्रदूषण'],
+      bn: ['उन्हाळा', 'उष्माघात', 'पाऊस', 'पाणी', 'प्रदूषण'],
+      gu: ['उन्हाळा', 'उष्माघात', 'पाऊस', 'पाणी', 'प्रदूषण'],
+      kn: ['उन्हाळा', 'उष्माघात', 'पाऊस', 'पाणी', 'प्रदूषण']
+    };
+
+    function changeLang(l) {
+      curLang = l;
+
+      // Update all static UI labels
+      const labelMap = {
+        'appTitle': 'appTitle', 'appSubtitle': 'appSubtitle', 'aiStatus': 'aiStatus',
+        'lblFeels': 'lblFeels', 'lblHumidity': 'lblHumidity', 'lblWind': 'lblWind',
+        'lblVisibility': 'lblVisibility', 'lblAnomaly': 'lblAnomaly', 'lblCO2': 'lblCO2',
+        'lblSeaIce': 'lblSeaIce', 'lblHeatDays': 'lblHeatDays',
+        'chatTitle': 'chatTitle', 'chatSubtitle': 'chatSubtitle', 'lblSearch': 'lblSearch'
+      };
+      Object.keys(labelMap).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = t(labelMap[id]);
+      });
+
+      // Update textarea placeholder
+      document.getElementById('msgIn').placeholder = l === 'en'
+        ? 'Ask about survival, weather, or climate...'
+        : 'Ask in your language...';
+
+      // Update navigation labels
+      const navs = t('nav');
+      if (Array.isArray(navs)) {
+        navs.forEach((n, i) => { const el = document.getElementById('nav' + i); if (el) el.textContent = n; });
+      }
+
+      // Update quick chips
+      const chips = chipTranslations[l] || chipTranslations.en;
+      const queries = chipQueries[l] || chipQueries.en;
+      const chipsRow = document.getElementById('quickChips');
+      if (chipsRow) {
+        chipsRow.innerHTML = chips.map((label, i) => {
+          if (i === chips.length - 1) {
+            return `<div class="chip" onclick="fqWeather()">${chips[chips.length - 1]}</div>`;
+          }
+          const q = queries[i] || queries[0];
+          return `<div class="chip" onclick="fq(${JSON.stringify(q)})">${label}</div>`;
+        }).join('');
+      }
+
+      // Update welcome message
+      const wb = document.querySelector('#chatBox .msg.a .mb');
+      if (wb) wb.innerHTML = t('welcome');
+
+      // Reset chat history since language changed
+      history = [];
+    }
+
+    // ── WEATHER ──────────────────────────────────────────────
+    const weatherIcons = {
+      'Sunny': '☀️', 'Clear': '🌙', 'Partly cloudy': '⛅', 'Cloudy': '☁️', 'Overcast': '☁️',
+      'Mist': '🌫️', 'Fog': '🌫️', 'Freezing fog': '🌫️', 'Patchy rain possible': '🌦️',
+      'Blowing snow': '❄️', 'Light rain': '🌧️', 'Moderate rain': '🌧️', 'Heavy rain': '🌧️',
+      'Thundery outbreaks': '⛈️', 'Patchy snow possible': '🌨️', 'Blizzard': '❄️',
+      'default': '🌤️'
+    };
+
+    function getWeatherIcon(desc) {
+      for (const k in weatherIcons) { if (desc.toLowerCase().includes(k.toLowerCase())) return weatherIcons[k]; }
+      return weatherIcons.default;
+    }
+
+    async function fetchWeather(city) {
+      const c = city || document.getElementById('cityInput').value.trim() || 'Mumbai';
+      document.getElementById('wDesc').textContent = 'Loading...';
+      try {
+        const r = await fetch(`https://wttr.in/${encodeURIComponent(c)}?format=j1`);
+        const d = await r.json();
+        const cur = d.current_condition[0];
+        const area = d.nearest_area[0];
+        const desc = cur.weatherDesc[0].value;
+        const tempC = parseInt(cur.temp_C);
+        const feelC = parseInt(cur.FeelsLikeC);
+        const hum = cur.humidity;
+        const wind = cur.windspeedKmph;
+        const vis = cur.visibility;
+        const areaName = area.areaName[0].value + ', ' + area.country[0].value;
+        document.getElementById('wIcon').textContent = getWeatherIcon(desc);
+        document.getElementById('wTemp').textContent = tempC + '°C';
+        document.getElementById('wDesc').textContent = desc;
+        document.getElementById('wFeel').textContent = feelC + '°C';
+        document.getElementById('wHum').textContent = hum + '%';
+        document.getElementById('wWind').textContent = wind + ' km/h';
+        document.getElementById('wVis').textContent = vis + ' km';
+        document.getElementById('wLocation').textContent = '📍 ' + areaName;
+        document.getElementById('wTime').textContent = 'Updated: ' + new Date().toLocaleTimeString();
+        curWeather = { city: c, tempC, feelC, hum, wind, vis, desc, areaName };
+        updateSeaIce(d);
+      } catch (e) {
+        document.getElementById('wDesc').textContent = 'Unable to fetch weather. Check city name.';
+      }
+    }
+
+    function updateSeaIce(d) {
+      // Use nearest area country to show relevant context
+      const month = new Date().getMonth();
+      const isNorthernSummer = month >= 4 && month <= 9;
+      document.getElementById('seaIce').textContent = isNorthernSummer ? '4.2M km²' : '14.5M km²';
+      document.getElementById('seaIceSub').textContent = isNorthernSummer ? '40% below 1980 avg' : '15% below 1980 avg';
+    }
+
+    function geoWeather() {
+      if (!navigator.geolocation) { fetchWeather('Mumbai'); return; }
+      document.getElementById('wDesc').textContent = 'Getting your location...';
+      navigator.geolocation.getCurrentPosition(
+        async pos => {
+          const { latitude: lat, longitude: lon } = pos.coords;
+          await fetchWeather(`${lat},${lon}`);
+        },
+        () => fetchWeather('Mumbai')
+      );
+    }
+
+    function fqWeather() {
+      if (curWeather) {
+        fq(`Current weather in ${curWeather.areaName}: ${curWeather.tempC}°C, ${curWeather.desc}, humidity ${curWeather.hum}%. What are the health risks and what should I do to stay safe today?`);
+      } else {
+        fq('What are the weather-related health risks I should watch out for today?');
+      }
+    }
+
+    // ── NAVIGATION ───────────────────────────────────────────
+    function sw(id) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-card').forEach(c => c.classList.remove('active'));
+      document.getElementById('panel-' + id).classList.add('active');
+      const map = { ai: 0, heat: 1, flood: 2, rain: 3, huri: 4, cli: 5, kit: 6 };
+      if (map[id] !== undefined) document.querySelectorAll('.nav-card')[map[id]].classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function goAI(q) { sw('ai'); document.getElementById('msgIn').value = q; send(); }
+    function fq(q) { document.getElementById('msgIn').value = q; send(); }
+
+    // ── CHAT ─────────────────────────────────────────────────
+    function ag(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 110) + 'px'; }
+    function hk(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }
+
+    function addMsg(role, html) {
+      const box = document.getElementById('chatBox');
+      const d = document.createElement('div');
+      d.className = 'msg ' + role;
+      d.innerHTML = `<div class="ml">${role === 'u' ? 'YOU' : 'CLIMATEGUARD AI'}</div><div class="mb">${html}</div>`;
+      box.appendChild(d);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function showTyping() {
+      const box = document.getElementById('chatBox');
+      const d = document.createElement('div');
+      d.className = 'msg a'; d.id = 'typing';
+      d.innerHTML = `<div class="ml">CLIMATEGUARD AI</div><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+      box.appendChild(d); box.scrollTop = box.scrollHeight;
+    }
+
+    function rmTyping() { const e = document.getElementById('typing'); if (e) e.remove(); }
+
+    async function send() {
+      if (busy) return;
+      const inp = document.getElementById('msgIn');
+      const txt = inp.value.trim();
+      if (!txt) return;
+      inp.value = ''; inp.style.height = 'auto';
+      busy = true; document.getElementById('sendBtn').disabled = true;
+
+      // Add weather context to message if available
+      let userMsg = txt;
+      if (curWeather && !txt.toLowerCase().includes('weather')) {
+        userMsg = txt; // Don't auto-inject, keep it clean
+      }
+
+      addMsg('u', txt.replace(/</g, '&lt;'));
+      history.push({ role: 'user', content: userMsg });
+      showTyping();
+
+      // Build system prompt with weather context
+      let sys = t('sysprompt');
+      if (curWeather) {
+        sys += ` Current local weather context: ${curWeather.tempC}°C, ${curWeather.desc}, humidity ${curWeather.hum}%, wind ${curWeather.wind} km/h in ${curWeather.areaName}. Use this to give relevant advice when appropriate.`;
+      }
+
+      try { // १. AI कडून उत्तर मिळवणे
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ system: sys, messages: history, lang: curLang })
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          rmTyping();
+          let errMsg = '⚠️ माफ करा, सर्व्हरशी संपर्क होऊ शकला नाही. कृपया थोड्या वेळाने पुन्हा प्रयत्न करा.';
+          try { const e = JSON.parse(errText); if (e.error) errMsg = '⚠️ ' + e.error; } catch (e) { }
+          addMsg('a', errMsg);
+          history.pop();
+          busy = false; document.getElementById('sendBtn').disabled = false;
+          return;
+        }
+
+        const data = await res.json();
+
+        if (data.error) {
+          rmTyping();
+          let errorMessage = typeof data.error === 'string' ? data.error : (data.error.message || 'Unknown error');
+          addMsg('a', '⚠️ Groq Error: ' + errorMessage);
+          history.pop();
+          busy = false; document.getElementById('sendBtn').disabled = false;
+          return;
+        }
+
+        const botReply = data.content[0].text;
+        const reply = botReply;
+        
+        // ३. जर Tide डेटा आला असेल तर तो स्क्रीनवर दाखवा
+        if (data.tide && document.getElementById('tide-info')) {
+          document.getElementById('tide-info').innerText = "समुद्राची पातळी: " + data.tide;
+        }
+
+        rmTyping();
+
+        // २. चॅट बॉक्समध्ये उत्तर दाखवणे
+        const formattedReply = reply.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>');
+        
+        addMsg('a', formattedReply);
+        history.push({ role: 'assistant', content: reply });
+        changeVideoBasedOnKeyword(reply);
+      } catch (err) {
+        rmTyping();
+        addMsg('a', '⚠️ Network error: ' + err.message + '. Please check your internet connection and try again.');
+        history.pop();
+      }
+
+      busy = false; document.getElementById('sendBtn').disabled = false;
+    }
+
+    // ── INIT ─────────────────────────────────────────────────
+    geoWeather();
+    setTimeout(() => { if (!curWeather) fetchWeather('Mumbai'); }, 8000);
+    simulateClimateData();
+
+    function changeVideoBasedOnKeyword(text) {
+      const t = text.toLowerCase();
+      let vid = 'https://cdn.pixabay.com/vimeo/147112028/clouds-1154.mp4?width=1280'; // Default
+      
+      if (t.includes('उन्हाळा') || t.includes('heat') || t.includes('sun') || t.includes('उष्माघात')) {
+        vid = 'https://cdn.pixabay.com/vimeo/329434839/sun-23263.mp4?width=1280';
+      } else if (t.includes('पाऊस') || t.includes('rain') || t.includes('monsoon')) {
+        vid = 'https://cdn.pixabay.com/vimeo/207037740/rain-8135.mp4?width=1280';
+      } else if (t.includes('वादळ') || t.includes('पूर') || t.includes('storm') || t.includes('flood') || t.includes('cyclone') || t.includes('hurricane')) {
+        vid = 'https://cdn.pixabay.com/vimeo/146054452/storm-1102.mp4?width=1280';
+      }
+      
+      const vEl = document.getElementById('bg-video');
+      if (vEl && !vEl.src.includes(vid)) {
+        vEl.src = vid;
+        vEl.load();
+        vEl.play().catch(e => console.log('Autoplay prevented:', e));
+      }
+    }
+  </script>
+</body>
+
+</html>
